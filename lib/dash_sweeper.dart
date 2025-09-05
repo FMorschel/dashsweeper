@@ -29,16 +29,10 @@ class _DashSweeperState extends State<DashSweeper> {
     final dashAmount = amount ~/ 10; // TODO customize percentage
     final emptyAmount = amount - dashAmount;
 
-    // create tiles
-    final dashTiles = List.generate(
-      dashAmount,
-      (_) => DashTile(TileState.idle),
-    );
-    final emptyTiles = List.generate(
-      emptyAmount,
-      (_) => EmptyTile(TileState.idle),
-    );
-    tiles = [...dashTiles, ...emptyTiles]..shuffle();
+    tiles = [
+      for (var _ in dashAmount.thisLengthList) DashTile(TileState.idle),
+      for (var _ in emptyAmount.thisLengthList) EmptyTile(TileState.idle),
+    ]..shuffle();
   }
 
   bool inBounds(int row, int column) {
@@ -87,7 +81,7 @@ class _DashSweeperState extends State<DashSweeper> {
 
   void handleOnTap(int index) {
     final tile = tiles[index];
-    if (tile.state != TileState.idle) return;
+    if (!tile.state.isIdle) return;
 
     if (tile is DashTile) {
       _gameOver();
@@ -358,6 +352,8 @@ typedef NamedPoint = ({int row, int column});
 
 extension on int {
   List<int> get adjacents => [this - 1, this, this + 1];
+
+  List<int> get thisLengthList => [for (var i = 0; i < this; i++) i];
 }
 
 extension on NamedPoint {
