@@ -48,7 +48,8 @@ class _DashSweeperState extends State<DashSweeper> {
         column < widget.columns;
   }
 
-  int? getIndex(int row, int column) {
+  int? getIndex(NamedPoint point) {
+    var (:row, :column) = point;
     if (!inBounds(row, column)) return null;
     return (row * widget.columns) + column;
   }
@@ -67,9 +68,7 @@ class _DashSweeperState extends State<DashSweeper> {
 
   Iterable<int> getNeighbouringIndeces(int index) {
     final point = getPointForIndex(index);
-    return [
-      for (var (:row, :column) in point.adjacents) getIndex(row, column),
-    ].nonNulls;
+    return point.adjacents.map(getIndex).nonNulls;
   }
 
   void handleOnLongPress(int index) {
