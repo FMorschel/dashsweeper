@@ -53,7 +53,7 @@ class _DashSweeperState extends State<DashSweeper> {
     return (row * widget.columns) + column;
   }
 
-  ({int row, int column}) getPointForIndex(int index) {
+  NamedPoint getPointForIndex(int index) {
     final row = (index / widget.columns).floor();
     final column = index % widget.columns;
     return (row: row, column: column);
@@ -68,9 +68,7 @@ class _DashSweeperState extends State<DashSweeper> {
   Iterable<int> getNeighbouringIndeces(int index) {
     final point = getPointForIndex(index);
     return [
-      for (var row in point.row.adjacents)
-        for (var column in point.column.adjacents)
-          getIndex(row, column),
+      for (var (:row, :column) in point.adjacents) getIndex(row, column),
     ].nonNulls;
   }
 
@@ -349,6 +347,17 @@ class TileItem extends StatelessWidget {
   }
 }
 
+typedef NamedPoint = ({int row, int column});
+
 extension on int {
   List<int> get adjacents => [this - 1, this, this + 1];
+}
+
+extension on NamedPoint {
+  List<NamedPoint> get adjacents {
+    return [
+      for (var row in row.adjacents)
+        for (var column in column.adjacents) (row: row, column: column),
+    ];
+  }
 }
