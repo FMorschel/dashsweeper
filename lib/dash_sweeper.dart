@@ -60,10 +60,10 @@ class _DashSweeperState extends State<DashSweeper> {
     return (row: row, column: column);
   }
 
-  List<int> getNeighbouringDashes(int index) {
-    return getNeighbouringIndeces(
-      index,
-    ).where((tileIndex) => tiles[tileIndex] is DashTile).toList();
+  int countNeighbouringDashes(int index) {
+    return getNeighbouringIndeces(index) // formatting hack
+        .where((tileIndex) => tiles[tileIndex] is DashTile)
+        .length;
   }
 
   Iterable<int> getNeighbouringIndeces(int index) {
@@ -184,8 +184,8 @@ class _DashSweeperState extends State<DashSweeper> {
     toReveal.add(index);
     checked.add(index);
 
-    final dashes = getNeighbouringDashes(index);
-    if (dashes.isNotEmpty) return toReveal;
+    final dashes = countNeighbouringDashes(index);
+    if (dashes > 0) return toReveal;
 
     final neighbours = getNeighbouringIndeces(index);
     if (checked.containsAll(neighbours)) return toReveal;
@@ -213,7 +213,7 @@ class _DashSweeperState extends State<DashSweeper> {
               onLongPress: () => handleOnLongPress(index),
             ),
             EmptyTile(:final state) => EmptyTileItem(
-              amount: getNeighbouringDashes(index).length,
+              amount: countNeighbouringDashes(index),
               state: state,
               onTap: () => handleOnTap(index),
               onLongPress: () => handleOnLongPress(index),
