@@ -53,54 +53,10 @@ class _DashSweeperState extends State<DashSweeper> {
     return (row * widget.columns) + column;
   }
 
-  (int row, int column) getPointForIndex(int index) {
+  ({int row, int column}) getPointForIndex(int index) {
     final row = (index / widget.columns).floor();
     final column = index % widget.columns;
-    return (row, column);
-  }
-
-  int? topLeftIndex(int row, int column) {
-    final targetRow = row - 1;
-    final targetColumn = column - 1;
-    return getIndex(targetRow, targetColumn);
-  }
-
-  int? topCenterIndex(int row, int column) {
-    final targetRow = row - 1;
-    return getIndex(targetRow, column);
-  }
-
-  int? topRightIndex(int row, int column) {
-    final targetRow = row - 1;
-    final targetColumn = column + 1;
-    return getIndex(targetRow, targetColumn);
-  }
-
-  int? leftIndex(int row, int column) {
-    final targetColumn = column - 1;
-    return getIndex(row, targetColumn);
-  }
-
-  int? rightIndex(int row, int column) {
-    final targetColumn = column + 1;
-    return getIndex(row, targetColumn);
-  }
-
-  int? bottomLeftIndex(int row, int column) {
-    final targetRow = row + 1;
-    final targetColumn = column - 1;
-    return getIndex(targetRow, targetColumn);
-  }
-
-  int? bottomCenterIndex(int row, int column) {
-    final targetRow = row + 1;
-    return getIndex(targetRow, column);
-  }
-
-  int? bottomRightIndex(int row, int column) {
-    final targetRow = row + 1;
-    final targetColumn = column + 1;
-    return getIndex(targetRow, targetColumn);
+    return (row: row, column: column);
   }
 
   List<int> getNeighbouringDashes(int index) {
@@ -110,16 +66,11 @@ class _DashSweeperState extends State<DashSweeper> {
   }
 
   Iterable<int> getNeighbouringIndeces(int index) {
-    final (row, column) = getPointForIndex(index);
+    final point = getPointForIndex(index);
     return [
-      topLeftIndex(row, column),
-      topCenterIndex(row, column),
-      topRightIndex(row, column),
-      leftIndex(row, column),
-      rightIndex(row, column),
-      bottomLeftIndex(row, column),
-      bottomCenterIndex(row, column),
-      bottomRightIndex(row, column),
+      for (var row = point.row - 1; row < point.row + 2; row++)
+        for (var column = point.column - 1; column < point.column + 2; column++)
+          getIndex(row, column),
     ].nonNulls;
   }
 
