@@ -14,13 +14,34 @@ class DashSweeper extends StatefulWidget {
   State<DashSweeper> createState() => _DashSweeperState();
 }
 
-class _DashSweeperState extends State<DashSweeper> {
+class _DashSweeperState extends State<DashSweeper>
+    with TickerProviderStateMixin {
+  static const countdownMax = 3;
+
   late List<Tile> tiles;
+  late Animation<double> countdown;
+  late AnimationController countdownController;
+
+  bool paused = false;
 
   @override
   void initState() {
     super.initState();
+    countdownController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: countdownMax),
+    );
+    countdown = Tween<double>(
+      begin: countdownMax.toDouble(),
+      end: 0,
+    ).animate(countdownController);
     _generateTiles(widget.rows, widget.columns);
+  }
+
+  @override
+  void dispose() {
+    countdownController.dispose();
+    super.dispose();
   }
 
   void _generateTiles(int rows, int columns) {
@@ -200,6 +221,10 @@ class _DashSweeperState extends State<DashSweeper> {
           .map((tile) => tile.copyWith(state: TileState.revealed))
           .toList(growable: false);
     });
+    _gameOverDialog();
+  }
+
+  void _gameOverDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -208,8 +233,8 @@ class _DashSweeperState extends State<DashSweeper> {
           title: Text('Game Over'),
           content: Text('Bummer...'),
           actions: [
-            OutlinedButton(
-              onPressed: () {},
+            ElevatedButton(
+              onPressed: _timerToDialog,
               child: Text('Show field'),
             ),
             ElevatedButton(
@@ -223,6 +248,17 @@ class _DashSweeperState extends State<DashSweeper> {
         );
       },
     );
+  }
+
+  void _timerToDialog() {
+    Navigator.of(context).pop();
+    countdownController.forward(from: 0);
+    countdownController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) _gameOverDialog();
+        countdownController.reset();
+      }
+    });
   }
 
   /// Recursive function to get all empty tiles to reveal at once.
@@ -252,6 +288,53 @@ class _DashSweeperState extends State<DashSweeper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('DashSweeper'),
+            AnimatedBuilder(
+              animation: countdown,
+              builder: (context, child) {
+                if (countdownController.value == 0) return SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator.adaptive(
+                        value: countdown.value / countdownMax,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            paused = !paused;
+                          });
+                          if (paused) {
+                            countdownController.stop();
+                          } else {
+                            countdownController.forward();
+                          }
+                        },
+                        icon: Icon(
+                          paused ? Icons.play_arrow : Icons.pause,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: _resetGame,
+            icon: Icon(Icons.refresh),
+          ),
+        ],
+      ),
       body: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: widget.columns,
