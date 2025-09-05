@@ -225,7 +225,15 @@ class _DashSweeperState extends State<DashSweeper> {
   }
 }
 
-enum TileState { idle, revealed, flagged }
+enum TileState {
+  idle,
+  revealed,
+  flagged;
+
+  bool get isIdle => this == TileState.idle;
+  bool get isRevealed => this == TileState.revealed;
+  bool get isFlagged => this == TileState.flagged;
+}
 
 sealed class Tile {
   final TileState state;
@@ -323,18 +331,18 @@ class TileItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: state != TileState.idle ? 0 : 4,
+      elevation: state.isIdle ? 4 : 0,
       clipBehavior: Clip.antiAliasWithSaveLayer,
       child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
+        onTap: state.isIdle ? onTap : null,
+        onLongPress: state.isIdle ? onLongPress : null,
         child: Center(
           child: AnimatedSwitcher(
             duration: Duration(milliseconds: 300),
             child: switch (state) {
-              TileState.idle => SizedBox(),
+              TileState.idle => const SizedBox.shrink(),
               TileState.revealed => child,
-              TileState.flagged => Icon(
+              TileState.flagged => const Icon(
                 Icons.flag,
                 color: Colors.red,
               ),
