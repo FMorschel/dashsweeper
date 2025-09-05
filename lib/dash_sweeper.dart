@@ -68,8 +68,8 @@ class _DashSweeperState extends State<DashSweeper> {
   Iterable<int> getNeighbouringIndeces(int index) {
     final point = getPointForIndex(index);
     return [
-      for (var row = point.row - 1; row < point.row + 2; row++)
-        for (var column = point.column - 1; column < point.column + 2; column++)
+      for (var row in point.row.adjacents)
+        for (var column in point.column.adjacents)
           getIndex(row, column),
     ].nonNulls;
   }
@@ -347,4 +347,8 @@ class TileItem extends StatelessWidget {
       ),
     );
   }
+}
+
+extension on int {
+  List<int> get adjacents => [this - 1, this, this + 1];
 }
