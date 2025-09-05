@@ -210,6 +210,8 @@ class _DashSweeperState extends State<DashSweeper>
   }
 
   void _resetGame() {
+    paused = false;
+    countdownController.reset();
     setState(() {
       _generateTiles(widget.rows, widget.columns);
     });
@@ -255,8 +257,10 @@ class _DashSweeperState extends State<DashSweeper>
     countdownController.forward(from: 0);
     countdownController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        if (mounted) _gameOverDialog();
-        countdownController.reset();
+        if (mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
+          _gameOverDialog();
+          countdownController.reset();
+        }
       }
     });
   }
